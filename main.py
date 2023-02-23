@@ -78,6 +78,14 @@ class Main_window(customtkinter.CTk):
         self.appearance_mode_label = customtkinter.CTkLabel(self.sidebar_frame, text=f"{version_text}")
         self.appearance_mode_label.grid(row=0, column=0, padx=10, pady=(0, 0))
 
+        self.button_pars = customtkinter.CTkButton(master=self, text="Сбор данных",
+                                                   command=info_dialog)
+        self.button_pars.grid(row=0, column=1, padx=50, pady=50)
+
+        self.button_anal = customtkinter.CTkButton(master=self, text="Анализ данных",
+                                                   command=info_dialog)
+        self.button_anal.grid(row=1, column=1, padx=50, pady=50)
+
 
 class Info_window(customtkinter.CTk):
     def __init__(self):
