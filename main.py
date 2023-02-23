@@ -1,7 +1,11 @@
+import configparser
 import customtkinter
 
 customtkinter.set_appearance_mode("System")  # Modes: "System" (standard), "Dark", "Light"
 customtkinter.set_default_color_theme("green")  # Themes: "blue" (standard), "green", "dark-blue"
+
+config = configparser.ConfigParser()
+config.read("config.ini")
 
 description_text = "Парсер товаров корейской торговой площадки www.cream.co.kr (далее - ПАРСЕР), собирает информацию " \
                    "по введенным в конфигурционном файле (config.ini) критериям поиска в отдельный XLSX файл (при " \
@@ -17,16 +21,6 @@ author_text = "Author - @stirelshka8"
 version_text = "ver 0.2a"
 
 
-def set_dialog():
-    app_second = Set_window()
-    app_second.mainloop()
-
-
-def info_dialog():
-    app_second = Info_window()
-    app_second.mainloop()
-
-
 def change_appearance_mode_event(new_appearance_mode: str):
     customtkinter.set_appearance_mode(new_appearance_mode)
 
@@ -34,6 +28,17 @@ def change_appearance_mode_event(new_appearance_mode: str):
 def change_scaling_event(new_scaling: str):
     new_scaling_float = int(new_scaling.replace("%", "")) / 100
     customtkinter.set_widget_scaling(new_scaling_float)
+
+
+def info_dialog():
+    app_second = Info_window()
+    app_second.mainloop()
+
+
+def set_dialog():
+    app_second_set = Set_window()
+    app_second_set.mainloop()
+
 
 class Main_window(customtkinter.CTk):
     def __init__(self):
@@ -43,8 +48,8 @@ class Main_window(customtkinter.CTk):
         self.geometry(f"{500}x{400}")
 
         self.grid_columnconfigure(1, weight=1)
-        self.grid_columnconfigure((2, 3), weight=0)
-        self.grid_rowconfigure((0, 1, 2), weight=1)
+        self.grid_columnconfigure(2, weight=0)
+        self.grid_rowconfigure(0, weight=1)
 
         self.sidebar_frame = customtkinter.CTkFrame(self, width=140, corner_radius=0)
         self.sidebar_frame = customtkinter.CTkFrame(self, width=140, corner_radius=0)
@@ -89,30 +94,64 @@ class Info_window(customtkinter.CTk):
 
 
 class Set_window(customtkinter.CTk):
+
     def __init__(self):
         super().__init__()
 
-        self.title("Настройки")
-        self.geometry("400x300")
-        self.entry_search = customtkinter.CTkEntry(self, placeholder_text="Что ищем?", width=360)
-        self.entry_search.grid(row=1, column=2, columnspan=1, padx=(20, 0), pady=(5, 5), sticky="nsew")
-        self.entry_save = customtkinter.CTkEntry(self, placeholder_text="Имя файла данных ", width=360)
-        self.entry_save.grid(row=2, column=2, columnspan=2, padx=(20, 0), pady=(5, 5), sticky="nsew")
-        self.entry_save_anal = customtkinter.CTkEntry(self, placeholder_text="Имя файла аналитики ", width=360)
-        self.entry_save_anal.grid(row=3, column=2, columnspan=2, padx=(20, 0), pady=(5, 5), sticky="nsew")
-        self.entry_save_login = customtkinter.CTkEntry(self, placeholder_text="Brickset логин ", width=360)
-        self.entry_save_login.grid(row=4, column=2, columnspan=2, padx=(20, 0), pady=(5, 5), sticky="nsew")
-        self.entry_save_pass = customtkinter.CTkEntry(self, placeholder_text="Brickset пароль ", width=360)
-        self.entry_save_pass.grid(row=5, column=2, columnspan=2, padx=(20, 0), pady=(5, 5), sticky="nsew")
-        self.entry_save_api = customtkinter.CTkEntry(self, placeholder_text="Brickset API токен ", width=360)
-        self.entry_save_api.grid(row=6, column=2, columnspan=2, padx=(20, 0), pady=(5, 5), sticky="nsew")
+        try:
+            self.preset_search = config['CONFIG']['search']
+            self.preset_save = config['CONFIG']['save']
+            self.preset_anal = config['CONFIG']['save_analytics']
+        except:
+            self.preset_search = "ВВЕДИТЕ ТЕКСТ"
+            self.preset_save = "ВВЕДИТЕ ТЕКСТ"
+            self.preset_anal = "ВВЕДИТЕ ТЕКСТ"
 
-        self.sidebar_button_2 = customtkinter.CTkButton(self, text="Информация",
-                                                        command=info_dialog)
+        self.title("Настройки")
+        self.geometry("570x200")
+
+        self.search_label = customtkinter.CTkLabel(self, text="Что ищем?", anchor="w")
+        self.search_label.grid(row=1, column=0, padx=20, pady=(10, 0))
+        self.entry_search = customtkinter.CTkEntry(self, placeholder_text=f"{self.preset_search}", width=360)
+        self.entry_search.grid(row=1, column=2, columnspan=1, padx=(20, 0), pady=(5, 5), sticky="nsew")
+
+        self.save_label = customtkinter.CTkLabel(self, text="Файл данных", anchor="w")
+        self.save_label.grid(row=2, column=0, padx=20, pady=(10, 0))
+        self.entry_save = customtkinter.CTkEntry(self, placeholder_text=f"{self.preset_save}", width=360)
+        self.entry_save.grid(row=2, column=2, columnspan=2, padx=(20, 0), pady=(5, 5), sticky="nsew")
+
+        self.anal_label = customtkinter.CTkLabel(self, text="Файл аналитики", anchor="w")
+        self.anal_label.grid(row=3, column=0, padx=20, pady=(10, 0))
+        self.entry_save_anal = customtkinter.CTkEntry(self, placeholder_text=f"{self.preset_anal}", width=360)
+        self.entry_save_anal.grid(row=3, column=2, columnspan=2, padx=(20, 0), pady=(5, 5), sticky="nsew")
+
+        self.sidebar_button_2 = customtkinter.CTkButton(self, text="СОХРАНИТЬ", command=self.save_set)
         self.sidebar_button_2.grid(row=8, column=2, columnspan=2, padx=20, pady=30)
 
+    def save_set(self):
+        search_get = self.entry_save_anal.get()
+        save_get = self.entry_save_anal.get()
+        save_anal = self.entry_save_anal.get()
 
+        try:
+            config.add_section("CONFIG")
+        except:
+            pass
 
+        config.set("CONFIG", "search", search_get)
+        config.set("CONFIG", "save", save_get)
+        config.set("CONFIG", "save_analytics", save_anal)
+
+        try:
+            config.add_section("INSTALL")
+            config.set("INSTALL", "set_up", "True")
+        except:
+            pass
+
+        with open("config.ini", "w") as config_file:
+            config.write(config_file)
+
+        Set_window.destroy(self)
 
 
 if __name__ == "__main__":
